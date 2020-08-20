@@ -14,5 +14,7 @@
       
       *** Line 59: Tên của các class
       
+      *** Line 184: Thay đổi đường dẫn input 
+      
       *** Hàm visualize nhận đầu vào là ảnh frame = ảnh original, detect = kết quả trả về sau khi predict ảnh, classs = tên của các classs để visual
       
