@@ -1,6 +1,6 @@
 # predict_detectron2
 
-*PREDICT TRÊN VIDEO
+* PREDICT TRÊN VIDEO
   ** (Set up môi trường theo hướng dẫn này)[https://trello.com/c/jfFtKJG4/14-link-train-detectron]
   ** Set config từ line 45 - 60
       *** Line 49: đường dẫn đến file config của model
