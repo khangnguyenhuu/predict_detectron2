@@ -138,10 +138,10 @@ def visualize (out, frame, classs):
     re.append (h)
     return re
 
-def write_txt_detectron(file_name, out, size, output_path):
-  boxes = out['instances'].pred_boxes
-  scores = out['instances'].scores
-  classes = out['instances'].pred_classes
+def write_txt_detectron(file_name, obj_detect, size, output_path):
+  boxes = obj_detect['instances'].pred_boxes
+  scores = obj_detect['instances'].scores
+  classes = obj_detect['instances'].pred_classes
   f = open(output_path + '/' + file_name + '.txt', 'w')
   _scores = []
   _classes = []
