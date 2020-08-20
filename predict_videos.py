@@ -101,20 +101,78 @@ def register (classes, dicts):
     Metadata = MetadataCatalog.get("fptt/train")
     return Metadata
 
-def visualize (detect, frame, classs):
-  boxes = detect['instances'].pred_boxes
-  scores = detect['instances'].scores
-  classes = detect['instances'].pred_classes
+def visualize (out, frame, classs):
+  boxes = out['instances'].pred_boxes
+  scores = out['instances'].scores
+  classes = out['instances'].pred_classes
   for i in range (len(classes)):
-    if (classes[i] == 2 or classes[i] == 3 or classes[i] == 4 or classes[i] == 6 or classes[i] == 7 or classes[i] == 8):
-      if (scores[i] > 0.5):
-        for j in boxes[i]:
-          start = (int (j[0]), int (j[1]))
-          end = (int (j[2]), int (j[3]))
-        color = int (classes[i])
-        cv2.rectangle(frame, start, end, (random.randint(0,255),random.randint(0,255),255), 1)
-        cv2.putText(frame, str (classs[color]),start, cv2.FONT_HERSHEY_PLAIN, 1, (random.randint(0,255),random.randint(0,255),255), 2)
+    if (scores[i] > 0.5):
+      for j in boxes[i]:
+        start = (int (j[0]), int (j[1]))
+        end = (int (j[2]), int (j[3]))
+      color = int (classes[i])
+      print (classes[i])
+      cv2.rectangle(frame, start, end, (random.randint(0,255),random.randint(0,255),255), 1)
+      cv2.putText(frame, str (classs[color]),start, cv2.FONT_HERSHEY_PLAIN, 1, (random.randint(0,255),random.randint(0,255),255), 2)
   return frame
+
+  def convert(size, box):
+    re = []
+    dw = 1./(size[0])
+    dh = 1./(size[1])
+    x = (box[0] + box[1])/2.0 - 1
+    y = (box[2] + box[3])/2.0 - 1
+    w = box[1] - box[0]
+    h = box[3] - box[2]
+    x = x*dw #x center
+    w = w*dw
+    y = y*dh #y center
+    h = h*dh
+    x = str (x)
+    y = str (y)
+    w = str (w)
+    h = str (h)
+    re.append (x)
+    re.append (y)
+    re.append (w)
+    re.append (h)
+    return re
+
+def write_txt_detectron(file_name, out, size, output_path):
+  boxes = out['instances'].pred_boxes
+  scores = out['instances'].scores
+  classes = out['instances'].pred_classes
+  f = open(output_path + '/' + file_name + '.txt', 'w')
+  _scores = []
+  _classes = []
+  for i in scores:
+    i = float (i)
+    i = str (i)
+    _scores.append(i)
+  for i in classes:
+    i = int (i)
+    i = str (i)
+    _classes.append (i)
+  final = []
+  tmp = []
+  for i in range (len(boxes.tensor)):
+    for j in boxes.tensor[i]:
+      j = float (j)
+      #j = str (j)
+      tmp.append (j)
+      if (len(tmp) == 4):
+        tmp = convert(size, tmp)
+        tmp.append(_scores[i])
+        tmp.append (_classes[i])
+        final = tmp
+        tmp = []
+        final = ' '.join(final)
+        f.write(final)
+        f.write('\n')
+        final = []
+
+  f.close()
+
     
 if __name__ == '__main__':
     #classes = ['di_bo','xe_dap','xe_may','xe_hang_rong','xe_ba_gac','xe_taxi','xe_hoi','xe_ban_tai','xe_cuu_thuong','xe_khach','xe_buyt','xe_tai','xe_container','xe_cuu_hoa']
@@ -122,25 +180,28 @@ if __name__ == '__main__':
     # with open('/content/drive/My Drive/Khang làm ở chỗ này/frcnn_train_dicts.json', 'r') as fp:
     #   train_dicts = json.load(fp)
     # Metadata = register(classes, train_dicts)
-    cap = cv2.VideoCapture('/content/drive/My Drive/Counting/aic-hcmc2020/videos/cam_01.mp4')
+    output_dir = '/content/output'
+    cap = cv2.VideoCapture('/content/drive/My Drive/Counting/aic-hcmc2020/videos/cam_18.mp4')
     #cap = cv2.VideoCapture ('/content/drive/My Drive/Counting/Video/Videos/NKKN-VoThiSau 2017-07-18_08_00_00_000.asf')
     fps = cap.get(cv2.CAP_PROP_FPS)
     fourcc =  cv2.VideoWriter_fourcc(*'XVID')
     size = (int (cap.get(cv2.CAP_PROP_FRAME_WIDTH)), int (cap.get(cv2.CAP_PROP_FRAME_HEIGHT)))
-    out = cv2.VideoWriter('/content/drive/My Drive/cam_01.avi', fourcc, 15, size, 1)
+    out = cv2.VideoWriter( output_dir + '/cam_18.avi', fourcc, 15, size, 1)
     
     count = 0
+    frame_id = 0
     while True:
         ret, frame = cap.read()
         if ret != True:
             break
         outputs = object_detect(frame)
-        print (outputs)
         video = visualize(outputs, frame, classs)
-        video = cv2.resize(video, size)
-        count += 1
-        print (count)
+        #video = cv2.resize(video, size)
+        #print (video.shape)
         out.write(video)
+        frame_id += 1
+        print ('process on frame: ', frame_id)
+        write_txt_detectron ('frame_' + str(frame_id), outputs, size, output_dir)
         key = cv2.waitKey(1)  & 0xff
         if key == 27:
             break

@@ -32,19 +32,19 @@ def predict (path_weigths, path_config, confidence_threshold, num_of_class, path
   return outputs
 
 #Đầu vào detect = output của hàm predict, frame = original image của mình, classs = tên class để visualize
-def visualize (detect, frame, classs):
-  boxes = detect['instances'].pred_boxes
-  scores = detect['instances'].scores
-  classes = detect['instances'].pred_classes
+def visualize (out, frame, classs):
+  boxes = out['instances'].pred_boxes
+  scores = out['instances'].scores
+  classes = out['instances'].pred_classes
   for i in range (len(classes)):
-    if (classes[i] == 2 or classes[i] == 3 or classes[i] == 4 or classes[i] == 6 or classes[i] == 7 or classes[i] == 8):
-      if (scores[i] > 0.5):
-        for j in boxes[i]:
-          start = (int (j[0]), int (j[1]))
-          end = (int (j[2]), int (j[3]))
-        color = int (classes[i])
-        cv2.rectangle(frame, start, end, (random.randint(0,255),random.randint(0,255),255), 1)
-        cv2.putText(frame, str (classs[color]),start, cv2.FONT_HERSHEY_PLAIN, 1, (random.randint(0,255),random.randint(0,255),255), 2)
+    if (scores[i] > 0.5):
+      for j in boxes[i]:
+        start = (int (j[0]), int (j[1]))
+        end = (int (j[2]), int (j[3]))
+      color = int (classes[i])
+      print (classes[i])
+      cv2.rectangle(frame, start, end, (random.randint(0,255),random.randint(0,255),255), 1)
+      cv2.putText(frame, str (classs[color]),start, cv2.FONT_HERSHEY_PLAIN, 1, (random.randint(0,255),random.randint(0,255),255), 2)
   return frame
 
   def main:
